@@ -47,7 +47,7 @@ UPLOAD
 * RESULT:
 - BERHASIL:
   - status: OK
-  - data_namafile : nama file yang diupload
+  - nama_tersimpan : nama file yang diupload client dan disimpan dalam server
 - GAGAL:
   - status: ERROR
   - data: pesan kesalahan
