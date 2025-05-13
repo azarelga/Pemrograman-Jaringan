@@ -40,15 +40,21 @@ def send_command(command_str=""):
 
 def remote_upload(filename=""):
     command_str = f"UPLOAD {filename}"
-    with open(filename, "rb") as fp:
-        isifile = base64.b64encode(fp.read()).decode()
+    try:
+        with open(filename, "rb") as fp:
+            isifile = base64.b64encode(fp.read()).decode()
+    except:
+        print(f"[ERROR] tidak ada file bernama {filename}!")
+        return False
     filename = os.path.basename(filename)
-    command_str = f"UPLOAD {filename} {isifile}"
+    command_str = f"UPLOAD {filename} {isifile}\r\n\r\n"
     hasil = send_command(command_str)
     if hasil["status"] == "OK":
+        print(hasil)
         return True
     else:
         print("Gagal")
+        print(hasil)
         return False
 
 
