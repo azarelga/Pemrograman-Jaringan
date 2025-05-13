@@ -13,7 +13,7 @@ def send_command(command_str=""):
     sock.connect(server_address)
     logging.warning(f"connecting to {server_address}")
     try:
-        logging.warning(f"sending message ")
+        logging.warning("sending message ")
         sock.sendall(command_str.encode())
         # Look for the response, waiting until socket is done (no more data)
         data_received = ""  # empty string
@@ -33,15 +33,16 @@ def send_command(command_str=""):
         hasil = json.loads(data_received)
         logging.warning("data received from server:")
         return hasil
-    except:
-        logging.warning("error during data receiving")
+    except Exception as e:
+        logging.warning(f"error during data receiving: {e}")
         return False
 
 
 def remote_upload(filename=""):
     command_str = f"UPLOAD {filename}"
     with open(filename, "rb") as fp:
-        isifile = base64.b64encode(fp.read())
+        isifile = base64.b64encode(fp.read()).decode()
+    filename = os.path.basename(filename)
     command_str = f"UPLOAD {filename} {isifile}"
     hasil = send_command(command_str)
     if hasil["status"] == "OK":
@@ -62,7 +63,7 @@ def remote_delete(filename=""):
 
 
 def remote_list():
-    command_str = f"LIST"
+    command_str = "LIST"
     hasil = send_command(command_str)
     if hasil["status"] == "OK":
         print("daftar file : ")
@@ -75,7 +76,7 @@ def remote_list():
 
 
 def remote_get(filename=""):
-    command_str = f"GET {filename}"
+    command_str = "GET {filename}"
     hasil = send_command(command_str)
     if hasil["status"] == "OK":
         # proses file dalam bentuk base64 ke bentuk bytes

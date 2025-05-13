@@ -26,24 +26,21 @@ class FileInterface:
         except Exception as e:
             return dict(status="ERROR", data=str(e))
 
-    def upload(self,params=[]):
+    def upload(self, params=[]):
         try:
             filename = params[0]
             filecontent = params[1]
-
-            # cek filenya kosong apa tidak
-            if (filecontent == ''):
+            if filecontent == "":
                 return dict(status="ERROR", data="file yang diupload kosong!")
 
-            # menulis ke dalam file
             isifile = base64.b64decode(filecontent)
-            fp = open(filename,'wb+')
+            fp = open(filename, "wb+")
             fp.write(isifile)
             fp.close()
-            
-            return dict(status="OK", data_namafile=filename)
+
+            return dict(status="OK", nama_tersimpan=filename)
         except Exception as e:
-            return dict(status='ERROR',data=str(e))
+            return dict(status="ERROR", data=str(e))
 
     def delete(self, params=[]):
         try:
