@@ -34,6 +34,9 @@ def send_command(command_str=""):
         # at this point, data_received (string) will contain all data coming from the socket
         # to be able to use the data_received as a dict, need to load it using json.loads()
         print()
+        if data_received.endswith("\r\n\r\n"):
+            data_received = data_received[:-4]
+        print("DEBUG: data_received =", repr(data_received))
         hasil = json.loads(data_received)
         logging.warning("[INFO] data received from server:")
         return hasil

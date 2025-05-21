@@ -41,9 +41,7 @@ def send_command(command_str=""):
         logging.warning("data received from server:")
         return hasil
     except Exception as e:
-        logging.warning("DEBUG: data_received = %s", repr(data_received))
         logging.warning(f"error during data receiving: {e}")
-        raise SystemExit()
         return False
 
 
@@ -208,7 +206,7 @@ if __name__ == "__main__":
     # 1, 5, 50 Servers = 3
     # 2 * 3 * 3 * 3 = 54
     server_worker_pool = int(input("num server workers: "))
-    for task in [0,1]:
+    for task in [0]:
         for vol in ["10", "50", "100"]:
             for num in [1, 5, 50]:
                 print(f"""
