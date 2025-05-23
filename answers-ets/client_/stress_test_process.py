@@ -1,7 +1,7 @@
 import base64
 import pandas as pd
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 import hashlib
 import json
 import logging
@@ -41,7 +41,9 @@ def send_command(command_str=""):
         logging.warning("data received from server:")
         return hasil
     except Exception as e:
+        logging.warning("DEBUG: data_received = %s", repr(data_received))
         logging.warning(f"error during data receiving: {e}")
+        raise SystemExit()
         return False
 
 
@@ -138,7 +140,7 @@ def stress_test(num_worker=1, volume_file=10, task=1, server_worker_pool=0, nomo
     server_success = 0
     server_fail = 0
 
-    with ThreadPoolExecutor(num_worker) as executor:
+    with ProcessPoolExecutor(num_worker) as executor:
         futures = [
             executor.submit(worker_task, i, task, dict_file, volume_file)
             for i in range(num_worker)
@@ -192,8 +194,8 @@ if __name__ == "__main__":
         "Jumlah worker server yang gagal",
     ]
 
-    if os.path.exists("stress_test_log_thread.csv"):
-        df = pd.read_csv("stress_test_log_thread.csv")
+    if os.path.exists("stress_test_log_process.csv"):
+        df = pd.read_csv("stress_test_log_process.csv")
         ops = df["Nomor"].max() + 1
     else:
         df = pd.DataFrame(columns=column)
@@ -206,7 +208,7 @@ if __name__ == "__main__":
     # 1, 5, 50 Servers = 3
     # 2 * 3 * 3 * 3 = 54
     server_worker_pool = int(input("num server workers: "))
-    for task in [0, 1]:
+    for task in [0,1]:
         for vol in ["10", "50", "100"]:
             for num in [1, 5, 50]:
                 print(f"""
@@ -228,7 +230,7 @@ if __name__ == "__main__":
                     logging.warning("Log added:")
                     logging.warning(log_row)
                     df.loc[len(df)] = log_row
-                    df.to_csv("stress_test_log_thread.csv", index=False)
+                    df.to_csv("stress_test_log_process.csv", index=False)
                     ops += 1
                 except Exception as e:
                     logging.warning(f"error during stress test: {e}")
