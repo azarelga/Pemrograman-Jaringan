@@ -1,0 +1,5 @@
+RAM: 32GB
+CPU: 12th Gen Intel i7-12700 (20 CPUs) ~2.1GHz
+Memory for Docker: 24GB (12GB per machine)
+Memory Swap for Docker: 80GB (40GB per machine)
+Socket Throughput: 512 x 1024 x 1024 bytes = 512MB
