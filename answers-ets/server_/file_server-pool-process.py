@@ -21,7 +21,7 @@ def ProcessTheClient(connection):
             while True:
                 if b"\r\n\r\n" in buffer:
                     break
-                data = connection.recv(65536)  # Increased from 32 bytes
+                data = connection.recv(512 * 1024 * 1024)  # Increased from 32 bytes
                 if not data:
                     break
                 buffer += data
