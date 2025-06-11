@@ -60,11 +60,13 @@ class HTTPClient:
             if verify_certs:
                 cert = secure_socket.getpeercert()
                 if cert:
-                    logging.info(f"Certificate verified for {destination_address}")
+                    logging.info(
+                        f"Certificate verified for {destination_address}")
                     logging.info(
                         f"Certificate subject: {cert.get('subject', 'Unknown')}"
                     )
-                    logging.info(f"Certificate issuer: {cert.get('issuer', 'Unknown')}")
+                    logging.info(
+                        f"Certificate issuer: {cert.get('issuer', 'Unknown')}")
                 else:
                     logging.warning("No certificate information available")
 
@@ -135,7 +137,8 @@ class HTTPClient:
         request = request.encode("utf-8")
 
         logging.info(f"GET request to {url}")
-        response = self.send_request(host, port, request, is_secure, verify_certs)
+        response = self.send_request(
+            host, port, request, is_secure, verify_certs)
 
         self._save_response_to_file(response, path)
 
@@ -143,10 +146,13 @@ class HTTPClient:
 
     def _save_response_to_file(self, response, path):
         """Save HTTP response to file, separating headers from body"""
-        if path.endswith("/") or path.endswith("."):
-            return
         filename = os.path.basename(path)
         print(filename)
+
+        confirm = input(f"Save response body {path} to file? (y/n): ")
+
+        if path.endswith("/") or path.endswith(".") or confirm.lower() != "y":
+            return
         try:
             # Split headers and body
             if b"\r\n\r\n" in response:
@@ -255,7 +261,8 @@ if __name__ == "__main__":
     print()
     while True:
         prompt = input("> ")
-        request, param = prompt.split(" ", 1) if " " in prompt else (prompt, "")
+        request, param = prompt.split(
+            " ", 1) if " " in prompt else (prompt, "")
         if request.lower() == "exit":
             response = None
             break
@@ -268,7 +275,8 @@ if __name__ == "__main__":
             cleaned_param = param.lstrip("/")
             target_url = f"{address.rstrip('/')}/delete/{cleaned_param}"
 
-            response = client.delete_request(target_url, {}, verify_certs=False)
+            response = client.delete_request(
+                target_url, {}, verify_certs=False)
         elif request.lower() == "post":
             # Parse POST command: post <path> <data>
             parts = param.split(" ", 1) if " " in param else [param, ""]
