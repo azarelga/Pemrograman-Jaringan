@@ -103,7 +103,7 @@ class HTTPClient:
                     break
 
             sock.close()
-            return response.decode("utf-8", errors="ignore")
+            return response
 
         except Exception as e:
             logging.error(f"Request sending error: {str(e)}")
@@ -135,7 +135,39 @@ class HTTPClient:
         request = request.encode("utf-8")
 
         logging.info(f"GET request to {url}")
-        return self.send_request(host, port, request, is_secure, verify_certs)
+        response = self.send_request(host, port, request, is_secure, verify_certs)
+
+        self._save_response_to_file(response, path)
+
+        return response.decode("utf-8", errors="ignore")
+
+    def _save_response_to_file(self, response, path):
+        """Save HTTP response to file, separating headers from body"""
+        if path.endswith("/") or path.endswith("."):
+            return
+        filename = os.path.basename(path)
+        print(filename)
+        try:
+            # Split headers and body
+            if b"\r\n\r\n" in response:
+                headers, body = response.split(b"\r\n\r\n", 1)
+            else:
+                headers = response
+                body = b""
+
+            # Save body to file
+            with open(filename, "wb") as f:
+                f.write(body)
+
+            logging.info(f"File saved as: {filename}")
+            logging.info(f"File size: {len(body)} bytes")
+
+            # Return headers as string for display
+            return
+
+        except Exception as e:
+            logging.error(f"Error saving file {filename}: {e}")
+            return
 
     def delete_request(self, url, headers=None, verify_certs=False):
         """Perform DELETE request"""
@@ -163,7 +195,9 @@ class HTTPClient:
         request = request.encode("utf-8")
 
         logging.info(f"DELETE request to {url}")
-        return self.send_request(host, port, request, is_secure, verify_certs)
+        return self.send_request(host, port, request, is_secure, verify_certs).decode(
+            "utf-8", errors="ignore"
+        )
 
     def post_request(self, url, data=None, headers=None, verify_certs=False):
         """Perform POST request"""
@@ -202,7 +236,9 @@ class HTTPClient:
         request += data
 
         logging.info(f"POST request to {url}")
-        return self.send_request(host, port, request, is_secure, verify_certs)
+        return self.send_request(host, port, request, is_secure, verify_certs).decode(
+            "utf-8", errors="ignore"
+        )
 
 
 if __name__ == "__main__":
