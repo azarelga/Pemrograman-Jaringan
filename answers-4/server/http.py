@@ -76,7 +76,7 @@ class HttpServer:
 
     def http_get(self, object_address, headers):
         object_address = object_address[1:]
-        full_path = os.path.join(self.file_serving_root, object_address)
+        full_path = os.path.abspath(object_address)
         if os.path.isdir(full_path) or object_address.endswith("/"):
             return self.http_list(object_address, headers)
         elif os.path.isfile(full_path):
@@ -84,7 +84,8 @@ class HttpServer:
                 with open(full_path, "rb") as fp:
                     isi = fp.read()
 
-                fext = os.path.splitext(self.file_serving_root + object_address)[1]
+                fext = os.path.splitext(
+                    self.file_serving_root + object_address)[1]
                 content_type = self.types.get(fext, "application/octet-stream")
 
                 headers = {}
@@ -105,22 +106,36 @@ class HttpServer:
         # Extract POST body from the original data
 
         if self.logging:
-            self.logging.info(f"POST to {object_address} with body: {body[:100]}...")
+            self.logging.info(
+                f"POST to {object_address} with body: {body[:100]}...")
 
         response_body = f"Received POST to {object_address}\nBody length: {len(body)} bytes\nBody content:\n{body}"
         return self.response(200, "OK", response_body, {"Content-type": "text/plain"})
 
     def http_list(self, object_address, headers):
         dir_path = urllib.parse.unquote(object_address)
-        if not os.path.isdir(dir_path):
+        dir_path_abs = os.path.abspath(dir_path)
+        if not os.path.isdir(dir_path_abs):
             return self.response(
                 404,
                 "Not Found",
                 f"{dir_path} is not a directory",
                 {"Content-type": "text/plain"},
             )
+        current_dir = os.path.abspath(self.file_serving_root)
+        if not (
+            dir_path_abs == current_dir or dir_path_abs.startswith(
+                current_dir + os.sep)
+        ):
+            return self.response(
+                403,
+                "Forbidden",
+                "Directory listing for parent directories is disabled.",
+                {"Content-type": "text/plain"},
+            )
+
         try:
-            files = os.listdir(dir_path)
+            files = os.listdir(dir_path_abs)
             body = "\n".join(files)
             return self.response(200, "OK", body, {"Content-type": "text/plain"})
         except Exception as e:
@@ -153,7 +168,8 @@ class HttpServer:
                 f.close()
 
             if self.logging:
-                self.logging.info(f"File uploaded: {safe_filename} ({len(body)} bytes)")
+                self.logging.info(
+                    f"File uploaded: {safe_filename} ({len(body)} bytes)")
 
             return self.response(
                 201,
